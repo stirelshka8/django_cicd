@@ -20,6 +20,9 @@ jobs:
       DB_HOST: ${{ secrets.DB_HOST }}
       DB_ENGINE: ${{ secrets.DB_ENGINE }}
       ALLOWED_HOSTS: ${{ secrets.ALLOWED_HOSTS }}
+      SSH_HOST: ${{ secrets.SSH_HOST }}
+      SSH_NAME: ${{ secrets.SSH_NAME }}
+      SSH_PASS: ${{ secrets.SSH_PASS }}
     services:
       postgres_main:
         image: postgres:12
@@ -45,12 +48,14 @@ jobs:
           python-version: 3.9
 
       - name: Set mod
-        run: |
-          pip install -r requirements.txt
-          pip install flake8
+        run: pip install -r requirements.txt
 
-      - name: Linting
-        run: flake8 logistic --exclude logistic/migrations
+      - name: Dep
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ env.SSH_HOST }}
+          username: ${{ env.SSH_NAME }}
+          password: ${{ env.SSH_PASS }}
+          script: expect /home/adminserver/django_cicd/pull.exp
 
-#      - name: Dep
-#        uses:
+
